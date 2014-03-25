@@ -47,7 +47,7 @@ void loop()
   vw_send((uint8_t *)msg, 2);
   vw_wait_tx(); // Wait until the whole message is gone
   digitalWrite(led_pin, LOW);
-  delay(500);
+  delay(100);
   count = count + 1;
   
   level = setLevel();
@@ -76,7 +76,7 @@ int setLevel(){
       incomingByte = Serial.read();
 
       // say what you got:
-      Serial.print("I received: ");
+      //Serial.print("I received: ");
       Serial.println(incomingByte, DEC);
       
       return (int) incomingByte;
