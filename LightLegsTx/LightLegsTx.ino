@@ -15,6 +15,8 @@ const int transmit_pin = 12;
 const int receive_pin = 2;
 const int transmit_en_pin = 3;
 
+int level = 0;
+
 void setup()
 {
     // Initialise the IO and ISR
@@ -25,22 +27,27 @@ void setup()
     vw_setup(2000);       // Bits per sec
     pinMode(led_pin, OUTPUT);
 
-    firmataSetup();
+    //firmataSetup();
 }
 
 byte count = 1;
 
 void loop()
 {
-  char msg[7] = {'h','e','l','l','o',' ','#'};
+  char msg[2] = {0, level};
 
   msg[6] = count;
   digitalWrite(led_pin, HIGH); // Flash a light to show transmitting
-  vw_send((uint8_t *)msg, 7);
+  vw_send((uint8_t *)msg, 2);
   vw_wait_tx(); // Wait until the whole message is gone
   digitalWrite(led_pin, LOW);
-  delay(1000);
+  delay(500);
   count = count + 1;
+  if( level == 0 ){
+    level = 255;
+  } else {
+    level = 0;
+  }
   
-  firmataLoop();
+  //firmataLoop();
 }

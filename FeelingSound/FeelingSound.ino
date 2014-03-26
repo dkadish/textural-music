@@ -20,8 +20,10 @@
    This example code is in the public domain.
 
  */
- 
+#define N_NOTES 12
 
+char elements[N_NOTES] = {60,61,62,63,64,65,66,67,68,69,70,71};
+ 
 // these constants won't change:
 const int ledPin = 13;      // led connected to digital pin 13
 const int knockSensor = A0; // the piezo is connected to analog pin 0
@@ -37,13 +39,15 @@ int ledState = LOW;         // variable used to store the last LED status, to to
 
 SoftwareSerial mySerial(2, 3); // RX, TX
 
-byte note = 0; //The MIDI note value to be played
+byte note = random(87); //The MIDI note value to be played
 byte resetMIDI = 4; //Tied to VS1053 Reset line
 int  instrument = 0;
 
 void setup() {
  pinMode(ledPin, OUTPUT); // declare the ledPin as as OUTPUT
  Serial.begin(9600);       // use the serial port
+ delay(2000);
+ Serial.println("Startup!");
 
   //Setup soft serial for MIDI control
   mySerial.begin(31250);
@@ -60,13 +64,12 @@ void setup() {
   talkMIDI(0xC0, 8, 0); //Set instrument number. 0xC0 is a 1 data byte command
 }
 
-void loop() {
-  
+void loop() {  
   // read the sensor and store it in the variable sensorReading:
   sensorReading = analogRead(knockSensor);    
   
   // if the sensor reading is greater than the threshold:
-  if (sensorReading >= threshold) {
+  /*if (sensorReading >= threshold) {
     // toggle the status of the ledPin:
     ledState = !ledState;   
     // update the LED pin itself:        
@@ -76,19 +79,21 @@ void loop() {
   Serial.print("Sensor reading: ");
   Serial.println(sensorReading);     
   
-  note = ( sensorReading ) + 30;
+  //note = ( sensorReading ) + 30;
+  */
   
-  //Serial.println(note, DEC);
-  
+  note = getNextNote( note );
   //Note on channel 1 (0x90), some note value (note), middle velocity (0x45):
-  noteOn(0, note, 60);
+  noteOn(0, elements[note], 60);
   delay(50);
+  
+   Serial.println(elements[note], DEC);
 
   //Turn off the note with a given off/release velocity
-  noteOff(0, note, 60);
+  noteOff(0, elements[note], 60);
   
   delay(100);  // delay to avoid overloading the serial port buffer
-  }
+  //}
 }
 
 
@@ -116,3 +121,4 @@ void talkMIDI(byte cmd, byte data1, byte data2) {
 
   digitalWrite(ledPin, LOW);
 }
+
