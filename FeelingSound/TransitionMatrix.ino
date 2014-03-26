@@ -14,24 +14,15 @@ char transitionMatrix[N_NOTES][N_NOTES] = {
 };
 
 int getNextNote( int element_i){
-  //char* probabilities = (char *)malloc(87*sizeof(char));
-  //probabilities = transitionMatrix[element_i];
-  //Serial.print("Getting next note: ");
-  //Serial.println(element_i);
   
-  int e = 0;
-  int topElement = 0;
-  int thisElement = 0;
+  int e = 0; // The position of the element to play
+  int topElement = 0; // The score of the top-ranking element
+  int thisElement = 0; // The current element's score
   
-  /*int i=0;
-  //thisElement = transitionMatrix[element_i][i]*random(10);
-  Serial.println(transitionMatrix[25][0], DEC);
-  
-  return 25;
-  */
   for( int i=0; i < N_NOTES; i++){
-//    Serial.println(i);
-    thisElement = transitionMatrix[element_i][i]*random(10);
+    thisElement = transitionMatrix[element_i][i]*random(10); // Find this element's score
+    
+    // If it scores higher than the top element, set it as the top element
     if( thisElement > topElement ){
       topElement = thisElement;
       e = i;

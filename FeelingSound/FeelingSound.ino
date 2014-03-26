@@ -68,32 +68,17 @@ void loop() {
   // read the sensor and store it in the variable sensorReading:
   sensorReading = analogRead(knockSensor);    
   
-  // if the sensor reading is greater than the threshold:
-  /*if (sensorReading >= threshold) {
-    // toggle the status of the ledPin:
-    ledState = !ledState;   
-    // update the LED pin itself:        
-    digitalWrite(ledPin, ledState);
-    // send the string "Knock!" back to the computer, followed by newline
-    
-  Serial.print("Sensor reading: ");
-  Serial.println(sensorReading);     
-  
-  //note = ( sensorReading ) + 30;
-  */
-  
   note = getNextNote( note );
   //Note on channel 1 (0x90), some note value (note), middle velocity (0x45):
   noteOn(0, elements[note], 60);
   delay(50);
   
-   Serial.println(elements[note], DEC);
+  Serial.println(elements[note], DEC);
 
   //Turn off the note with a given off/release velocity
   noteOff(0, elements[note], 60);
   
   delay(100);  // delay to avoid overloading the serial port buffer
-  //}
 }
 
 
