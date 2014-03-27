@@ -1,31 +1,36 @@
 /* Knock Sensor
-  
-   This sketch reads a piezo element to detect a knocking sound. 
-   It reads an analog pin and compares the result to a set threshold. 
-   If the result is greater than the threshold, it writes
-   "knock" to the serial port, and toggles the LED on pin 13.
-  
-   The circuit:
-	* + connection of the piezo attached to analog in 0
-	* - connection of the piezo attached to ground
-	* 1-megohm resistor attached from analog in 0 to ground
-
-   http://www.arduino.cc/en/Tutorial/Knock
-   
-   created 25 Mar 2007
-   by David Cuartielles <http://www.0j0.org>
-   modified 30 Aug 2011
-   by Tom Igoe
-   
-   This example code is in the public domain.
-
+ 
+ This sketch reads a piezo element to detect a knocking sound. 
+ It reads an analog pin and compares the result to a set threshold. 
+ If the result is greater than the threshold, it writes
+ "knock" to the serial port, and toggles the LED on pin 13.
+ 
+ The circuit:
+ 	* + connection of the piezo attached to analog in 0
+ 	* - connection of the piezo attached to ground
+ 	* 1-megohm resistor attached from analog in 0 to ground
+ 
+ http://www.arduino.cc/en/Tutorial/Knock
+ 
+ created 25 Mar 2007
+ by David Cuartielles <http://www.0j0.org>
+ modified 30 Aug 2011
+ by Tom Igoe
+ 
+ This example code is in the public domain.
+ 
+ Next, try something about the distribution of hits in the span.
+ 
  */
 #define N_NOTES 12
-#define CUM_THRESH 250
-#define SAMPLE_DELAY 5
+#define CUM_THRESH 1000
+#define SAMPLE_DELAY 1
 
-char elements[N_NOTES] = {60,61,62,63,64,65,66,67,68,69,70,71};
- 
+#include <math.h>
+
+char elements[N_NOTES] = {
+  60,61,62,63,64,65,66,67,68,69,70,71};
+
 // these constants won't change:
 const int ledPin = 13;      // led connected to digital pin 13
 const int knockSensor = A0; // the piezo is connected to analog pin 0
@@ -48,14 +53,14 @@ byte resetMIDI = 4; //Tied to VS1053 Reset line
 int  instrument = 0;
 
 void setup() {
- pinMode(ledPin, OUTPUT); // declare the ledPin as as OUTPUT
- Serial.begin(9600);       // use the serial port
- delay(100);
- Serial.println("Startup!");
+  pinMode(ledPin, OUTPUT); // declare the ledPin as as OUTPUT
+  Serial.begin(9600);       // use the serial port
+  delay(100);
+  Serial.println("Startup!");
 
   //Setup soft serial for MIDI control
   mySerial.begin(31250);
-  
+
   //Reset the VS1053
   pinMode(resetMIDI, OUTPUT);
   digitalWrite(resetMIDI, LOW);
@@ -63,7 +68,7 @@ void setup() {
   digitalWrite(resetMIDI, HIGH);
   delay(100);
   talkMIDI(0xB0, 0x07, 120); //0xB0 is channel message, set channel volume to near max (127)
-  
+
   talkMIDI(0xB0, 0, 0x00); //Default bank GM1
   changeInstrument(4); //Set instrument number. 0xC0 is a 1 data byte command
 }
@@ -75,32 +80,37 @@ void loop() {
   if( sensorReading > maxSample ){
     maxSample = sensorReading;
   }
-  
+
   /*Serial.print(sensorReading);
-  Serial.print(", ");
-  Serial.print(nSamples);
-  Serial.print(", ");
-  Serial.println(cumSample);*/
-      
+   Serial.print(", ");
+   Serial.print(nSamples);
+   Serial.print(", ");
+   Serial.println(cumSample);*/
+
   if( cumSample > CUM_THRESH ){
     changeNote();
     //Serial.println();
   }
-  
+
   delay(SAMPLE_DELAY);
 }
 
 void changeNote(){
   //Turn off the note with a given off/release velocity
   //noteOff(0, elements[note], 60);
-  
+
   note = getNextNote( note );
   
+  float m = (float) maxSample;
+  
+  Serial.print(m);
+  Serial.print(", ");
+  Serial.println((int)(((m-1.0)*(log(2.38))/(log(m)))));
+
   //Note on channel 1 (0x90), some note value (note), middle velocity (0x45):
-  noteOn(0, elements[note], maxSample/8);
   
-  Serial.println(maxSample/4);
-  
+  noteOn(0, elements[note], (int)(((m-1.0)*(log(2.38))/(log(m)))));
+
   cumSample = 0;
   maxSample = 0;
 }
@@ -135,4 +145,5 @@ void talkMIDI(byte cmd, byte data1, byte data2) {
 
   digitalWrite(ledPin, LOW);
 }
+
 
