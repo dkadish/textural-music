@@ -21,6 +21,8 @@
 
  */
 #define N_NOTES 12
+#define CUM_THRESH 250
+#define SAMPLE_DELAY 5
 
 char elements[N_NOTES] = {60,61,62,63,64,65,66,67,68,69,70,71};
  
@@ -33,11 +35,9 @@ const int threshold = 8;  // threshold value to decide when the detected sound i
 int sensorReading = 0;      // variable to store the value read from the sensor pin
 int ledState = LOW;         // variable used to store the last LED status, to toggle the light
 
-unsigned long nextNoteTime = millis();
-
 // variables related to the sensor readings
-int nSamples = 0;
-unsigned long avgSample = 0;
+unsigned long cumSample = 0;
+int maxSample = 0;
 
 #include <SoftwareSerial.h>
 
@@ -50,7 +50,7 @@ int  instrument = 0;
 void setup() {
  pinMode(ledPin, OUTPUT); // declare the ledPin as as OUTPUT
  Serial.begin(9600);       // use the serial port
- delay(2000);
+ delay(100);
  Serial.println("Startup!");
 
   //Setup soft serial for MIDI control
@@ -65,48 +65,44 @@ void setup() {
   talkMIDI(0xB0, 0x07, 120); //0xB0 is channel message, set channel volume to near max (127)
   
   talkMIDI(0xB0, 0, 0x00); //Default bank GM1
-  talkMIDI(0xC0, 8, 0); //Set instrument number. 0xC0 is a 1 data byte command
+  changeInstrument(4); //Set instrument number. 0xC0 is a 1 data byte command
 }
 
 void loop() {  
   // read the sensor and store it in the variable sensorReading:
   sensorReading = analogRead(knockSensor);
-  if( sensorReading != 0 ){
-    nSamples++;
-    avgSample = (avgSample * (nSamples-1) + sensorReading) / nSamples;
+  cumSample += sensorReading;
+  if( sensorReading > maxSample ){
+    maxSample = sensorReading;
   }
   
   /*Serial.print(sensorReading);
   Serial.print(", ");
   Serial.print(nSamples);
   Serial.print(", ");
-  Serial.println(avgSample);*/
+  Serial.println(cumSample);*/
       
-  if( millis() > nextNoteTime ){
+  if( cumSample > CUM_THRESH ){
     changeNote();
     //Serial.println();
   }
   
-  delay(1);
+  delay(SAMPLE_DELAY);
 }
 
 void changeNote(){
   //Turn off the note with a given off/release velocity
-  noteOff(0, elements[note], 60);
+  //noteOff(0, elements[note], 60);
   
   note = getNextNote( note );
   
   //Note on channel 1 (0x90), some note value (note), middle velocity (0x45):
-  noteOn(0, elements[note], 60);
+  noteOn(0, elements[note], maxSample/8);
   
-  nextNoteTime = millis() + 1000 - avgSample*10;
+  Serial.println(maxSample/4);
   
-  Serial.print(nSamples);
-  Serial.print(", ");
-  Serial.println(avgSample);
-  
-  nSamples = 0;
-  avgSample = 0;
+  cumSample = 0;
+  maxSample = 0;
 }
 
 
@@ -119,6 +115,11 @@ void noteOn(byte channel, byte note, byte attack_velocity) {
 //Send a MIDI note-off message.  Like releasing a piano key
 void noteOff(byte channel, byte note, byte release_velocity) {
   talkMIDI( (0x80 | channel), note, release_velocity);
+}
+
+//Send a MIDI note-off message.  Like releasing a piano key
+void changeInstrument(byte instrument) {
+  talkMIDI(0xC0, instrument, 0);
 }
 
 //Plays a MIDI note. Doesn't check to see that cmd is greater than 127, or that data values are less than 127
