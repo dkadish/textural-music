@@ -29,11 +29,15 @@ const int ledPin = 13;      // led connected to digital pin 13
 const int knockSensor = A0; // the piezo is connected to analog pin 0
 const int threshold = 8;  // threshold value to decide when the detected sound is a knock or not
 
-
 // these variables will change:
 int sensorReading = 0;      // variable to store the value read from the sensor pin
 int ledState = LOW;         // variable used to store the last LED status, to toggle the light
 
+unsigned long nextNoteTime = millis();
+
+// variables related to the sensor readings
+int nSamples = 0;
+unsigned long avgSample = 0;
 
 #include <SoftwareSerial.h>
 
@@ -66,19 +70,43 @@ void setup() {
 
 void loop() {  
   // read the sensor and store it in the variable sensorReading:
-  sensorReading = analogRead(knockSensor);    
+  sensorReading = analogRead(knockSensor);
+  if( sensorReading != 0 ){
+    nSamples++;
+    avgSample = (avgSample * (nSamples-1) + sensorReading) / nSamples;
+  }
   
-  note = getNextNote( note );
-  //Note on channel 1 (0x90), some note value (note), middle velocity (0x45):
-  noteOn(0, elements[note], 60);
-  delay(50);
+  /*Serial.print(sensorReading);
+  Serial.print(", ");
+  Serial.print(nSamples);
+  Serial.print(", ");
+  Serial.println(avgSample);*/
+      
+  if( millis() > nextNoteTime ){
+    changeNote();
+    //Serial.println();
+  }
   
-  Serial.println(elements[note], DEC);
+  delay(1);
+}
 
+void changeNote(){
   //Turn off the note with a given off/release velocity
   noteOff(0, elements[note], 60);
   
-  delay(100);  // delay to avoid overloading the serial port buffer
+  note = getNextNote( note );
+  
+  //Note on channel 1 (0x90), some note value (note), middle velocity (0x45):
+  noteOn(0, elements[note], 60);
+  
+  nextNoteTime = millis() + 1000 - avgSample*10;
+  
+  Serial.print(nSamples);
+  Serial.print(", ");
+  Serial.println(avgSample);
+  
+  nSamples = 0;
+  avgSample = 0;
 }
 
 
