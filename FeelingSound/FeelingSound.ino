@@ -27,6 +27,7 @@
 #define SAMPLE_DELAY 1
 
 #include <math.h>
+#include <Statistic.h>
 
 char elements[N_NOTES] = {
   60,61,62,63,64,65,66,67,68,69,70,71};
@@ -41,8 +42,7 @@ int sensorReading = 0;      // variable to store the value read from the sensor 
 int ledState = LOW;         // variable used to store the last LED status, to toggle the light
 
 // variables related to the sensor readings
-unsigned long cumSample = 0;
-int maxSample = 0;
+Statistic stats;
 
 #include <SoftwareSerial.h>
 
@@ -57,6 +57,8 @@ void setup() {
   Serial.begin(9600);       // use the serial port
   delay(100);
   Serial.println("Startup!");
+
+  stats.clear();
 
   //Setup soft serial for MIDI control
   mySerial.begin(31250);
@@ -76,20 +78,10 @@ void setup() {
 void loop() {  
   // read the sensor and store it in the variable sensorReading:
   sensorReading = analogRead(knockSensor);
-  cumSample += sensorReading;
-  if( sensorReading > maxSample ){
-    maxSample = sensorReading;
-  }
+  stats.add((float) sensorReading);
 
-  /*Serial.print(sensorReading);
-   Serial.print(", ");
-   Serial.print(nSamples);
-   Serial.print(", ");
-   Serial.println(cumSample);*/
-
-  if( cumSample > CUM_THRESH ){
+  if( stats.sum() > CUM_THRESH ){
     changeNote();
-    //Serial.println();
   }
 
   delay(SAMPLE_DELAY);
@@ -101,7 +93,7 @@ void changeNote(){
 
   note = getNextNote( note );
   
-  float m = (float) maxSample;
+  float m = stats.maximum(); //(float) maxSample;
   
   Serial.print(m);
   Serial.print(", ");
@@ -111,8 +103,7 @@ void changeNote(){
   
   noteOn(0, elements[note], (int)(((m-1.0)*(log(2.38))/(log(m)))));
 
-  cumSample = 0;
-  maxSample = 0;
+  stats.clear();
 }
 
 
