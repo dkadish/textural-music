@@ -16,7 +16,7 @@ const int receive_pin = 2;
 const int transmit_en_pin = 3;
 
 char id = 0;
-char level = 0;
+char level[] = {0,0,0,0,0,0,0,0};
 
 void setup()
 {
@@ -38,26 +38,25 @@ byte count = 1;
 void loop()
 { 
   // Message format = {'target_id', 'brightness'}
-  char msg[2] = {id, level};
+  for( int i = 0; i <=7; i++){
+    char msg[2] = {i, level[i]};
   
-  //char msg[7] = {'h','e','l','l','o',' ','#'};
-
-  //msg[6] = count;
-  digitalWrite(led_pin, HIGH); // Flash a light to show transmitting
-  vw_send((uint8_t *)msg, 2);
-  vw_wait_tx(); // Wait until the whole message is gone
-  digitalWrite(led_pin, LOW);
-  delay(100);
-  count = count + 1;
-  
-  level = setLevel();
-  
-  Serial.print("Looped ");
-  Serial.print(id, DEC);
-  Serial.print(", ");
-  Serial.print(level, DEC);
-  Serial.print('\n');
+    //msg[6] = count;
+    digitalWrite(led_pin, HIGH); // Flash a light to show transmitting
+    vw_send((uint8_t *)msg, 2);
+    vw_wait_tx(); // Wait until the whole message is gone
+    digitalWrite(led_pin, LOW);
+    delay(100);
+    count = count + 1;
     
+    level[i] = setLevel();
+    
+    Serial.print("Looped ");
+    Serial.print(i, DEC);
+    Serial.print(", ");
+    Serial.print(level[i], DEC);
+    Serial.print('\n');
+  }
   //firmataLoop();
 }
 
@@ -71,16 +70,22 @@ int setLevel(){
     return 0;
   }*/
   
-  if (Serial.available() > 0) {
+  if (Serial.available() > 2) {
       // read the incoming byte:
       incomingByte = Serial.read();
 
       // say what you got:
-      //Serial.print("I received: ");
+      Serial.println(incomingByte, DEC);
+      
+      return (int) incomingByte;
+      // read the incoming byte:
+      incomingByte = Serial.read();
+
+      // say what you got:
       Serial.println(incomingByte, DEC);
       
       return (int) incomingByte;
   } else {
-    return level;
+    return level[0];
   }
 }
