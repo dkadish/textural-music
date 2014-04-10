@@ -10,15 +10,22 @@
 
 #include <VirtualWire.h>
 
-const int led_pin = 13;
+const int led_pin = 5;
+const int led_pin_2 = 6;
+const int status_pin = 13;
 const int transmit_pin = 12;
 const int receive_pin = 11;
 const int transmit_en_pin = 3;
+
+const int id = 7;
+
+int brightness = 0;
 
 void setup()
 {
     delay(1000);
     Serial.begin(9600);	// Debugging only
+    //delay(5000);
     Serial.println("setup");
 
     // Initialise the IO and ISR
@@ -31,27 +38,49 @@ void setup()
     vw_rx_start();       // Start the receiver PLL running
 
     pinMode(led_pin, OUTPUT);
+    pinMode(led_pin_2, OUTPUT);
+    pinMode(status_pin, OUTPUT);
+    digitalWrite(status_pin, LOW);
+    
+    delay(500);
+    for( int i=0; i < id; i++ ){
+      digitalWrite(status_pin, HIGH);
+      delay(100);
+      digitalWrite(status_pin, LOW);
+      delay(100);
+    }
 }
 
 void loop()
 {
     uint8_t buf[VW_MAX_MESSAGE_LEN];
     uint8_t buflen = VW_MAX_MESSAGE_LEN;
-
+    
     if (vw_get_message(buf, &buflen)) // Non-blocking
     {
-	int i;
+        digitalWrite(status_pin, HIGH);
+        
+       	int i;
 
-        digitalWrite(led_pin, HIGH); // Flash a light to show received good message
 	// Message with a good checksum received, dump it.
 	Serial.print("Got: ");
+        Serial.print(buflen, DEC);
+        Serial.print(": ");
 	
 	for (i = 0; i < buflen; i++)
 	{
-	    Serial.print(buf[i], HEX);
-	    Serial.print(' ');
+	    Serial.print(buf[i], DEC);
+	    Serial.print('.');
 	}
 	Serial.println();
-        digitalWrite(led_pin, LOW);
+        
+        if( buflen == 2 && buf[0]==id ){
+          brightness = (int) buf[1];
+        }
+        
+        digitalWrite(status_pin, LOW);
     }
+      
+    analogWrite(led_pin, brightness);
+    analogWrite(led_pin_2, brightness);
 }
