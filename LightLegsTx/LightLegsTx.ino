@@ -15,7 +15,6 @@ const int transmit_pin = 12;
 const int receive_pin = 2;
 const int transmit_en_pin = 3;
 
-char id = 0;
 char level[] = {0,0,0,0,0,0,0,0};
 
 void setup()
@@ -33,29 +32,45 @@ void setup()
     Serial.begin(9600);
 }
 
-byte count = 1;
+char buff[] = {0,0,0,0,0,0,0};
 
 void loop()
 { 
   // Message format = {'target_id', 'brightness'}
   for( int i = 0; i <=7; i++){
-    char msg[2] = {i, level[i]};
-  
-    //msg[6] = count;
-    digitalWrite(led_pin, HIGH); // Flash a light to show transmitting
-    vw_send((uint8_t *)msg, 2);
-    vw_wait_tx(); // Wait until the whole message is gone
-    digitalWrite(led_pin, LOW);
+    
+    // Check for Messages
+    if (Serial.available() > 0){
+       Serial.readBytesUntil('\n', buff, 7);
+       if(buff[0] >= 0 && buff[0] <= 7){
+         // Set the permanent level
+         level[buff[0]] = buff[1];
+         
+         // Send the message
+         char msg[2] = {buff[0], buff[1]};
+         digitalWrite(led_pin, HIGH); // Flash a light to show transmitting
+         vw_send((uint8_t *)msg, 2);
+         vw_wait_tx(); // Wait until the whole message is gone
+         digitalWrite(led_pin, LOW);
+       }
+    } else {
+      for( int i = 0; i <= 7; i++ ){
+        // If there is a message, send that one, otherwise, send them all
+        char msg[2] = {i, level[i]};
+        
+        digitalWrite(led_pin, HIGH); // Flash a light to show transmitting
+        vw_send((uint8_t *)msg, 2);
+        vw_wait_tx(); // Wait until the whole message is gone
+        digitalWrite(led_pin, LOW);
+        
+        Serial.print(i, DEC);
+        Serial.print(", ");
+        Serial.print(level[i], DEC);
+        Serial.print('\n');
+        delay(10);
+      }
+    }
     delay(100);
-    count = count + 1;
-    
-    level[i] = setLevel();
-    
-    Serial.print("Looped ");
-    Serial.print(i, DEC);
-    Serial.print(", ");
-    Serial.print(level[i], DEC);
-    Serial.print('\n');
   }
   //firmataLoop();
 }
