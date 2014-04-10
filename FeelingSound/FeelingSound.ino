@@ -25,6 +25,9 @@
 #define N_NOTES 12
 #define CUM_THRESH 1000
 #define SAMPLE_DELAY 1
+// From http://www.instructables.com/id/Send-and-Receive-MIDI-with-Arduino/step9/Pitchbend-and-Arduino/
+#define PITCHBEND 244
+#define PITCHBEND_ZERO 8192 // Between 0 and 16383
 
 #include <math.h>
 #include <Statistic.h>

@@ -11,10 +11,13 @@
 #include <VirtualWire.h>
 
 const int led_pin = 5;
+const int led_pin_2 = 6;
 const int status_pin = 13;
 const int transmit_pin = 12;
 const int receive_pin = 11;
 const int transmit_en_pin = 3;
+
+const int id = 7;
 
 int brightness = 0;
 
@@ -35,8 +38,17 @@ void setup()
     vw_rx_start();       // Start the receiver PLL running
 
     pinMode(led_pin, OUTPUT);
+    pinMode(led_pin_2, OUTPUT);
     pinMode(status_pin, OUTPUT);
-    digitalWrite(status_pin, HIGH);
+    digitalWrite(status_pin, LOW);
+    
+    delay(500);
+    for( int i=0; i < id; i++ ){
+      digitalWrite(status_pin, HIGH);
+      delay(100);
+      digitalWrite(status_pin, LOW);
+      delay(100);
+    }
 }
 
 void loop()
@@ -46,6 +58,8 @@ void loop()
     
     if (vw_get_message(buf, &buflen)) // Non-blocking
     {
+        digitalWrite(status_pin, HIGH);
+        
        	int i;
 
 	// Message with a good checksum received, dump it.
@@ -60,10 +74,13 @@ void loop()
 	}
 	Serial.println();
         
-        if( buflen == 2 && buf[0]==0 ){
+        if( buflen == 2 && buf[0]==id ){
           brightness = (int) buf[1];
         }
+        
+        digitalWrite(status_pin, LOW);
     }
       
     analogWrite(led_pin, brightness);
+    analogWrite(led_pin_2, brightness);
 }
