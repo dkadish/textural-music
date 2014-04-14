@@ -9,6 +9,8 @@
 // $Id: transmitter.pde,v 1.3 2009/03/30 00:07:24 mikem Exp $
 
 #include <VirtualWire.h>
+#define ID_MIN 1
+#define ID_MAX 8
 
 const int led_pin = 11;
 const int transmit_pin = 12;
@@ -27,7 +29,7 @@ void setup()
     vw_setup(2000);       // Bits per sec
     pinMode(led_pin, OUTPUT);
 
-    firmataSetup();
+    //firmataSetup();
     
     Serial.begin(9600);
 }
@@ -36,15 +38,11 @@ char buff[] = {0,0,0,0,0,0,0};
 
 void loop()
 { 
-  // Message format = {'target_id', 'brightness'}
-  for( int i = 0; i <=7; i++){
-    
-    // Check for Messages
-    if (Serial.available() > 0){
+  if (Serial.available() > 0){
        Serial.readBytesUntil('\n', buff, 7);
-       if(buff[0] >= 0 && buff[0] <= 7){
+       if(buff[0] >= ID_MIN && buff[0] <= ID_MAX){
          // Set the permanent level
-         level[buff[0]] = buff[1];
+         level[buff[0]-ID_MIN] = buff[1];
          
          // Send the message
          char msg[2] = {buff[0], buff[1]};
@@ -54,9 +52,9 @@ void loop()
          digitalWrite(led_pin, LOW);
        }
     } else {
-      for( int i = 0; i <= 7; i++ ){
+      for( int i = ID_MIN; i <= ID_MAX; i++ ){
         // If there is a message, send that one, otherwise, send them all
-        char msg[2] = {i, level[i]};
+        char msg[2] = {i, level[i-ID_MIN]};
         
         digitalWrite(led_pin, HIGH); // Flash a light to show transmitting
         vw_send((uint8_t *)msg, 2);
@@ -65,42 +63,11 @@ void loop()
         
         Serial.print(i, DEC);
         Serial.print(", ");
-        Serial.print(level[i], DEC);
+        Serial.print(level[i-ID_MIN], DEC);
         Serial.print('\n');
-        delay(10);
+        delay(100);
       }
     }
     delay(100);
-  }
   //firmataLoop();
-}
-
-int incomingByte = 0;
-
-int setLevel(){
-  //level = level + 10;
-  /*if( level == 0 ){
-    return 255;
-  } else {
-    return 0;
-  }*/
-  
-  if (Serial.available() > 2) {
-      // read the incoming byte:
-      incomingByte = Serial.read();
-
-      // say what you got:
-      Serial.println(incomingByte, DEC);
-      
-      return (int) incomingByte;
-      // read the incoming byte:
-      incomingByte = Serial.read();
-
-      // say what you got:
-      Serial.println(incomingByte, DEC);
-      
-      return (int) incomingByte;
-  } else {
-    return level[0];
-  }
 }
