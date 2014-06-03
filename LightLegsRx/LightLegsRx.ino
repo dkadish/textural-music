@@ -17,7 +17,7 @@ const int transmit_pin = 12;
 const int receive_pin = 11;
 const int transmit_en_pin = 3;
 
-const int id = 7;
+const int id = 8;
 
 int brightness = 0;
 
@@ -43,6 +43,8 @@ void setup()
     digitalWrite(status_pin, LOW);
     
     delay(500);
+    Serial.print("ID: ");
+    Serial.println(id);
     for( int i=0; i < id; i++ ){
       digitalWrite(status_pin, HIGH);
       delay(100);
@@ -55,9 +57,11 @@ void loop()
 {
     uint8_t buf[VW_MAX_MESSAGE_LEN];
     uint8_t buflen = VW_MAX_MESSAGE_LEN;
-    
+
+//    setLedBrightness(brightness/2);    
     if (vw_get_message(buf, &buflen)) // Non-blocking
-    {
+    {  
+//        setLedBrightness(brightness);
         digitalWrite(status_pin, HIGH);
         
        	int i;
@@ -79,8 +83,12 @@ void loop()
         }
         
         digitalWrite(status_pin, LOW);
-    }
-      
-    analogWrite(led_pin, brightness);
-    analogWrite(led_pin_2, brightness);
+    } 
+    
+   setLedBrightness(brightness);
+}
+
+void setLedBrightness(int b){
+    analogWrite(led_pin, b);
+    analogWrite(led_pin_2, b);
 }
