@@ -76,10 +76,10 @@ void setup()
   //Change to BMP capture mode and initialize the OV2640 module	  	  
   myCAM.set_format(JPEG);
 
-  delay(10);
+  delay(100);
   Serial.println("Initializing the camera...");
   myCAM.InitCAM();
-  delay(10);
+  delay(100);
   Serial.println("Setting the JPEG Size.");
   myCAM.OV2640_set_JPEG_size(OV2640_1280x1024);
   
@@ -185,22 +185,28 @@ void loop()
     while( (temp != 0xD9) | (temp_last != 0xFF) )
     {
       temp_last = temp;
+      
+      //Serial.println("Reading FIFO");
       temp = myCAM.read_fifo();
       //Write image data to buffer if not full
-      if(i < 256)
+      
+      if(i < 256){
         buf[i++] = temp;
-      else
-      {
+      } else {
+        Serial.print("Writing to file ");
+        Serial.println(k);
         //Write 256 bytes image data to file
         outFile.write(buf,256);
         i = 0;
         buf[i++] = temp;
       }
     }
+    Serial.println("Final Write");
     //Write the remain bytes in the buffer
     if(i > 0)
       outFile.write(buf,i);
 
+    Serial.println("Close File");
     //Close the file 
     outFile.close(); 
     total_time = millis() - total_time;
@@ -212,9 +218,9 @@ void loop()
     //Clear the start capture flag
     start_capture = 0;
     
-    myCAM.set_format(BMP);
+    /*myCAM.set_format(BMP);
     myCAM.InitCAM();
-    isShowFlag = true;	
+    isShowFlag = true;	*/
   }
 }
 
