@@ -81,7 +81,7 @@ void setup()
   myCAM.InitCAM();
   delay(100);
   Serial.println("Setting the JPEG Size.");
-  myCAM.OV2640_set_JPEG_size(OV2640_1280x1024);
+  myCAM.OV2640_set_JPEG_size(OV2640_1600x1200);
   
   //Initialize SD Card
   if (!SD.begin(SD_CS)) 
@@ -193,8 +193,9 @@ void loop()
       if(i < 256){
         buf[i++] = temp;
       } else {
-        Serial.print("Writing to file ");
-        Serial.println(k);
+        //Serial.print("Writing to file ");
+        //Serial.println(k);
+        delay(5);
         //Write 256 bytes image data to file
         outFile.write(buf,256);
         i = 0;
