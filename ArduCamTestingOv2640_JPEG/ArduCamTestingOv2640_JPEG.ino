@@ -73,10 +73,15 @@ void setup()
   else
   	Serial.println("OV2640 detected");
   	
-  //Change to BMP capture mode and initialize the OV2640 module	  	
-  myCAM.set_format(BMP);
+  //Change to BMP capture mode and initialize the OV2640 module	  	  
+  myCAM.set_format(JPEG);
 
+  delay(10);
+  Serial.println("Initializing the camera...");
   myCAM.InitCAM();
+  delay(10);
+  Serial.println("Setting the JPEG Size.");
+  myCAM.OV2640_set_JPEG_size(OV2640_1280x1024);
   
   //Initialize SD Card
   if (!SD.begin(SD_CS)) 
@@ -90,7 +95,7 @@ void setup()
 
 void loop()
 {
-    Serial.println("Start Loop");
+    //Serial.println("Start Loop");
   char str[8];
   File outFile;
   byte buf[256];
@@ -101,27 +106,32 @@ void loop()
   uint8_t start_capture = 0;
   int total_time = 0;
   
-  //Wait trigger from shutter buttom   
+  //Wait trigger from shutter buttom   init_caminit
   if(myCAM.read_reg(ARDUCHIP_TRIG) & SHUTTER_MASK)	
   {
     Serial.println("Got Trigger");
     isShowFlag = false;
+    /*Serial.println("Write Chip Mode");
     myCAM.write_reg(ARDUCHIP_MODE, 0x00);
+    Serial.println("Set JPEG");
     myCAM.set_format(JPEG);
-    myCAM.InitCAM();
+    Serial.println("Start Camera");
+    //myCAM.InitCAM();
 
-    //myCAM.OV2640_set_JPEG_size(OV2640_640x480);
-    myCAM.OV2640_set_JPEG_size(OV2640_1600x1200);
+    Serial.println("Set JPEG Size");
+    myCAM.OV2640_set_JPEG_size(OV2640_1280x1024);*/
+    //myCAM.OV2640_set_JPEG_size(OV2640_1600x1200);
     //Wait until buttom released
-    //while(myCAM.read_reg(ARDUCHIP_TRIG) & SHUTTER_MASK);
-    //delay(1000);
+    while(myCAM.read_reg(ARDUCHIP_TRIG) & SHUTTER_MASK);
+    delay(1000);
+    Serial.println("Released Trigger");
     start_capture = 1;
     	
     Serial.println("Finished Trigger");
   }
   else
   {
-    Serial.println("Got other thing");
+    /* //Serial.println("Got other thing");
     if(isShowFlag )
     {
       temp = myCAM.read_reg(ARDUCHIP_TRIG);
@@ -133,7 +143,7 @@ void loop()
          myCAM.write_reg(ARDUCHIP_MODE, 0x01);    		//Switch to CAM
          while(!(myCAM.read_reg(ARDUCHIP_TRIG)&0x01)); 	//Wait for VSYNC is gone
       }
-    }
+    }*/
   }
   if(start_capture)
   {
@@ -169,6 +179,7 @@ void loop()
     //Write first image data to buffer
     buf[i++] = temp;
     
+    //TODO: Works, but dies sometime after Saaving JPEG on the second camera shot.
     Serial.println("Saving JPEG");
     //Read JPEG data from FIFO
     while( (temp != 0xD9) | (temp_last != 0xFF) )
