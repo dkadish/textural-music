@@ -12,6 +12,9 @@
 #define LEAF3 11 // The ?? Leaf
 #define N 3
 
+#define LEAF 0
+#define LIGHT 1
+
 const int leaves[] = {LEAF1, LEAF2, LEAF3};
 const int lights[] = {LIGHT1, LIGHT2, LIGHT3};
 
@@ -41,6 +44,7 @@ void setup() {
   sCmd.addCommand("ON",    system_on);          // Turns LED on
   sCmd.addCommand("OFF",   system_off);         // Turns LED off
   sCmd.addCommand("P",     processCommand);  // Converts two arguments to integers and echos them back
+  sCmd.addCommand("AMP",     processAmplitudeChange);  // Changes the amplitude of a signal
   sCmd.setDefaultHandler(unrecognized);      // Handler for command that isn't matched  (says "What?")
   Serial.println("Ready");
 }
@@ -73,6 +77,62 @@ void system_off() {
     analogWrite(leaves[i], 0);
   }
   systemOn = false;
+}
+
+void processAmplitudeChange(){
+  // Commands come in the form of: AMP TYPE ID AMPLITUDE FADE
+  int object_type;
+  int amplitude;
+  int id;
+  int fade;
+  char *arg;
+  
+  arg = sCmd.next();
+  if( arg != NULL ){
+    object_type = atoi(arg);
+  } else {
+    object_type = -1;
+  }
+  
+  arg = sCmd.next();
+  if( arg != NULL ){
+    id = atoi(arg);
+  } else {
+    id = -1;
+  }
+  
+  arg = sCmd.next();
+  if( arg != NULL ){
+    amplitude = atoi(arg);
+  } else {
+    amplitude = -1;
+  }
+  
+  arg = sCmd.next();
+  if( arg != NULL ){
+    fade = atoi(arg);
+  } else {
+    fade = -1;
+  }
+  
+  // Execute command
+  if( object_type != -1 && amplitude != -1 && id != -1 ){
+    if( object_type == LEAF ){
+      if( fade == -1 ){
+        leafCycles[id].setAmplitude(amplitude);
+      } else {
+        leafCycles[id].setAmplitude(time, amplitude, fade);
+      }
+    } else if ( object_type == LIGHT ){
+      if( fade == -1 ){
+        lightCycles[id].setAmplitude(amplitude);
+      } else {
+        lightCycles[id].setAmplitude(time, amplitude, fade);
+      }
+    }
+  } else {
+    Serial.println("Invalid Command");
+  }
 }
 
 void processCommand() {
