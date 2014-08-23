@@ -45,6 +45,7 @@ void setup() {
   sCmd.addCommand("OFF",   system_off);         // Turns LED off
   sCmd.addCommand("P",     processCommand);  // Converts two arguments to integers and echos them back
   sCmd.addCommand("AMP",     processAmplitudeChange);  // Changes the amplitude of a signal
+  sCmd.addCommand("PER",     processPeriodChange);  // Changes the period of a signal
   sCmd.setDefaultHandler(unrecognized);      // Handler for command that isn't matched  (says "What?")
   Serial.println("Ready");
 }
@@ -129,6 +130,46 @@ void processAmplitudeChange(){
       } else {
         lightCycles[id].setAmplitude(time, amplitude, fade);
       }
+    }
+  } else {
+    Serial.println("Invalid Command");
+  }
+}
+
+void processPeriodChange(){
+  // Commands come in the form of: AMP TYPE ID AMPLITUDE FADE
+  int object_type;
+  int period;
+  int id;
+  char *arg;
+  
+  arg = sCmd.next();
+  if( arg != NULL ){
+    object_type = atoi(arg);
+  } else {
+    object_type = -1;
+  }
+  
+  arg = sCmd.next();
+  if( arg != NULL ){
+    id = atoi(arg);
+  } else {
+    id = -1;
+  }
+  
+  arg = sCmd.next();
+  if( arg != NULL ){
+    period = atoi(arg);
+  } else {
+    period = -1;
+  }
+  
+  // Execute command
+  if( object_type != -1 && period != -1 && id != -1 ){
+    if( object_type == LEAF ){
+        leafCycles[id].setPeriod(time, period);
+    } else if ( object_type == LIGHT ){
+        lightCycles[id].setPeriod(time, period);
     }
   } else {
     Serial.println("Invalid Command");
