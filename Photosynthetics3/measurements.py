@@ -28,14 +28,8 @@ class Foreground(object):
     
     def add(self, img):
         self.last_img = img
-        
         self.image = np.maximum(self.last_img, self.background) - self.last_img
 
-        maxval = 32767 #np.iinfo(self.image).max
-        fltimage = self.image / float(maxval)
-        
-        self.image = np.uint16(median(fltimage, disk(10)) * float(maxval))
-    
     def reset(self):
         self.background = self.last_img.copy()
         self.count = 1.0
