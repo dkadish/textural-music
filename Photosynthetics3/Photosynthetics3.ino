@@ -43,7 +43,7 @@ void setup() {
   // Setup callbacks for SerialCommand commands
   sCmd.addCommand("ON",    system_on);          // Turns LED on
   sCmd.addCommand("OFF",   system_off);         // Turns LED off
-  sCmd.addCommand("P",     processCommand);  // Converts two arguments to integers and echos them back
+  sCmd.addCommand("PWM",     processPulseWidthManagement);  // Converts two arguments to integers and echos them back
   sCmd.addCommand("AMP",     processAmplitudeChange);  // Changes the amplitude of a signal
   sCmd.addCommand("PER",     processPeriodChange);  // Changes the period of a signal
   sCmd.addCommand("AVG",     processAveragingChange);  // Changes the period of a signal
@@ -226,30 +226,17 @@ void processAveragingChange(){
   }
 }
 
-void processCommand() {
+void processPulseWidthManagement() {
   int aNumber;
   char *arg;
 
-  //Serial.println("We're in processCommand");
   arg = sCmd.next();
   if (arg != NULL) {
     aNumber = atoi(arg);    // Converts a char string to an integer
-    //Serial.print("First argument was: ");
-    //Serial.println(aNumber);;
-    analogWrite(LIGHT1, aNumber);
+    analogWrite(13, aNumber);
   }
   else {
     //Serial.println("No arguments");
-  }
-
-  arg = sCmd.next();
-  if (arg != NULL) {
-    aNumber = atol(arg);
-    //Serial.print("Second argument was: ");
-    //Serial.println(aNumber);
-  }
-  else {
-    //Serial.println("No second argument");
   }
 }
 
