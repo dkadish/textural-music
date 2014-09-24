@@ -70,10 +70,15 @@ class SineWave(Signal):
         self.t_adjust = self.__last_t - self._t #TODO: does this work?
         self._period = float(period)
         
-    def value(self, t):
+    def value(self, t, norm=False):
         self._t = (t + self.t_adjust) % self.period
         self.__last_t = t
-        return (math.sin((self.t+self.offset) * 2 * math.pi / self.period) + 1.0) * self.amplitude / 2.0 + self.v_min
+        v = (math.sin((self.t+self.offset) * 2 * math.pi / self.period) + 1.0) * self.amplitude / 2.0 + self.v_min
+        if norm:
+            if v < 0.0: return 0.0
+            elif v > 1.0: return 1.0
+        
+        return v
         
     @property
     def t(self):
@@ -90,6 +95,12 @@ class SignalGroup(Signal):
         
         self._period = reduce( lambda a, b: a*b, map(lambda signal: signal.period, signals))
         
-    def value(self, t):
-        v = reduce(lambda a, b: a*b, map(lambda signal: signal.value(t+self.offset), self.signals))
-        return (v - self._in_range[0]) / (self._in_range[1] - self._in_range[0]) * self.amplitude + self.v_min
+    def value(self, t, norm=True):
+        val = reduce(lambda a, b: a*b, map(lambda signal: signal.value(t+self.offset), self.signals))
+        v = (val - self._in_range[0]) / (self._in_range[1] - self._in_range[0]) * self.amplitude + self.v_min
+        
+        if norm:
+            if v < 0.0: return 0.0
+            elif v > 1.0: return 1.0
+        
+        return v
