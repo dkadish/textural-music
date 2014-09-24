@@ -25,7 +25,7 @@ class App:
         pygame.init()
         
         # Initialize all of the leaves and lights here
-        #self.__init_leaves()
+        self.__init_leaves()
         self.__init_lights()
         
         self._display_surf = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
@@ -85,8 +85,8 @@ class App:
     def __init_leaves(self):
         leaves = [
             # Purple Legs
-            PurbpleBiLeaf(self.xbee, 3, short=False),
-            PurbpleBiLeaf(self.xbee, 5, short=True),
+            PurpleBiLeaf(self.xbee, 3, short=False),
+            PurpleBiLeaf(self.xbee, 5, short=True),
             # White Leaf
             WhiteLeaf(self.xbee, 6), 
             # White Legs
