@@ -14,12 +14,12 @@ def communicator(ser, q):
         time.sleep(0.01)
         data = 128*math.sin(q.get()) + 128
 
-        ser.write('PWM %d\n' %(data))
+        ser.write('PWM 13 %d\n' %(data))
 
         while not q.empty():
             q.get()
 
-ser = serial.Serial('/dev/ttyACM0', 9600)
+ser = serial.Serial('/dev/tty.usbserial-A10139SD', 9600)
 q = LifoQueue()
 t1 = Thread(target=loop, args=(q,))
 t2 = Thread(target=communicator, args=(ser, q,))

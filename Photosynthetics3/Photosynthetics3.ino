@@ -1,13 +1,18 @@
 // Code for Photosynthetics - Riot on the Roof edition
 // David Kadish
 
+#define S Serial
+
+// Depends on the kroimon version of SerialCommand
+// Available at https://github.com/kroimon/Arduino-SerialCommand
 #include <SerialCommand.h>
+
 //#include <Cycles.h>
 
-const int pins[] = {3, 5, 6, 9};
-const int N = 4;
+const int pins[] = {3, 5, 6, 9, 10, 11, 13};
+const int N = 7;
 
-SerialCommand sCmd;     // The demo SerialCommand object
+SerialCommand sCmd(&S);     // The demo SerialCommand object
 unsigned long time;
 
 boolean systemOn = true;
@@ -20,15 +25,16 @@ void setup() {
   }
   
   // Setup Serial
-  Serial.begin(9600);
+  S.begin(9600);
   delay(10);
 
   // Setup callbacks for SerialCommand commands
   sCmd.addCommand("ON",    system_on);          // Turns LED on
   sCmd.addCommand("OFF",   system_off);         // Turns LED off
+  sCmd.addCommand("ALL",   all);         // Turns LED off
   sCmd.addCommand("PWM",     processPulseWidthManagement);  // Converts two arguments to integers and echos them back
   sCmd.setDefaultHandler(unrecognized);      // Handler for command that isn't matched  (says "What?")
-  //Serial.println("Ready");
+  //S.println("Ready");
 }
 
 void loop() {
@@ -37,7 +43,7 @@ void loop() {
 }
 
 void system_on() {
-  ///Serial.println("System on");
+  ///S.println("System on");
   /*for( int i = 0; i < N; i++ ){
     analogWrite(pins[i], 128);
   }*/
@@ -45,28 +51,44 @@ void system_on() {
 }
 
 void system_off() {
-  //Serial.println("System off");
+  //S.println("System off");
   for( int i = 0; i < N; i++ ){
     analogWrite(pins[i], 0);
   }
   systemOn = false;
 }
 
+void all() {
+  //S.println("System off");
+  for( int i = 0; i < N; i++ ){
+    analogWrite(pins[i], 255);
+  }
+  systemOn = false;
+}
+
 void processPulseWidthManagement() {
-  int aNumber;
+  //S.println("Got PWM Command");
+  int pin, val;
   char *arg;
+  
+  arg = sCmd.next();
+  if( arg != NULL ){
+    pin = atoi(arg);
+  } else {
+    pin = -1;
+  }
 
   arg = sCmd.next();
   if (arg != NULL) {
-    aNumber = atoi(arg);    // Converts a char string to an integer
-    analogWrite(13, aNumber);
+    val = atoi(arg);    // Converts a char string to an integer
+    analogWrite(pin, val);
   }
   else {
-    //Serial.println("No arguments");
+    //S.println("No arguments");
   }
 }
 
 // This gets set as the default handler, and gets called when no other command matches.
 void unrecognized(const char *command) {
-  //Serial.println("What?");
+  //S.println("What?");
 }
