@@ -6,10 +6,11 @@ from signals import SineWave, SignalGroup
 
 class PWMSprite(pygame.sprite.Sprite):
     
-    def __init__(self, serial_connection, pin, period=30):
+    def __init__(self, parent, board, pin, period=30):
         pygame.sprite.Sprite.__init__(self)
         
-        self.conn = serial_connection
+        self.parent = parent
+        self.board = board
         self.pin = pin
         self.value = 0
         
@@ -24,16 +25,19 @@ class PWMSprite(pygame.sprite.Sprite):
         
     def update(self):
         self.value = self.signal.value(time.time())
-        self.writeSerial()
+        
+    def on_render(self):
+        if self.parent.boards[self.board]:
+            self.writeSerial()
         
     def writeSerial(self):
         #print '%s: PWM %d %d' %(self.conn, self.pin, int(self.value*255))
-        self.conn.write("PWM %d %d\n" %(self.pin, int(self.value*255)))        
+        self.parent.boards[self.board].write("PWM %d %d\n" %(self.pin, int(self.value*255)))        
         
 class PurpleBiLeaf(PWMSprite):
 
-    def __init__(self, serial_connection, pin, short=False):
-        super(PurpleBiLeaf, self).__init__(serial_connection, pin)
+    def __init__(self, parent, board, pin, short=False):
+        super(PurpleBiLeaf, self).__init__(parent, board, pin)
         
         if short:
             longLoop = SineWave(period = 30*60, v_range = (0.0, 1.0))
@@ -46,8 +50,8 @@ class PurpleBiLeaf(PWMSprite):
         self.signal = SignalGroup([longLoop, midLoop, shortLoop], in_range=(0.0, 0.5))
     
 class WhiteLeaf(PWMSprite):
-    def __init__(self, serial_connection, pin):
-        super(WhiteLeaf, self).__init__(serial_connection, pin)
+    def __init__(self, parent, board, pin):
+        super(WhiteLeaf, self).__init__(parent, board, pin)
         
         longLoop = SineWave(period = 24*60, v_range = (0.0, 1.0), offset = 4*60)
         midLoop = SineWave(period = 5*60, v_range = (-0.5, 1.0), offset = 60)
@@ -59,8 +63,8 @@ class WhiteLeaf(PWMSprite):
 #        print '%s: PWM %d %d' %(self.conn, self.pin, int(self.value*255))
     
 class WhiteBiLeaf(PWMSprite):
-    def __init__(self, serial_connection, pin, short=False):
-        super(WhiteBiLeaf, self).__init__(serial_connection, pin)
+    def __init__(self, parent, board, pin, short=False):
+        super(WhiteBiLeaf, self).__init__(parent, board, pin)
         
         if short:
             longLoop = SineWave(period = 16*60, v_range = (0.0, 1.0))
@@ -73,8 +77,8 @@ class WhiteBiLeaf(PWMSprite):
         self.signal = SignalGroup([longLoop, midLoop, shortLoop], in_range=(0.0, 0.5))
     
 class WhiteScrunchie(PWMSprite):
-    def __init__(self, serial_connection, pin):
-        super(WhiteScrunchie, self).__init__(serial_connection, pin)
+    def __init__(self, parent, board, pin):
+        super(WhiteScrunchie, self).__init__(parent, board, pin)
         
         longLoop = SineWave(period = 43*60, v_range = (0.0, 1.0), offset = 1237)
         midLoop = SineWave(period = 3.2*60, v_range = (-0.2, 1.0), offset = 69)
@@ -82,9 +86,9 @@ class WhiteScrunchie(PWMSprite):
         self.signal = SignalGroup([longLoop, midLoop, shortLoop], in_range=(0.0, 0.5))
 
 class Light(PWMSprite):
-    def __init__(self, serial_connection, pin, longPeriod, longOffset, midPeriod, midOffset, maxVal=1.0):
-        super(Light, self).__init__(serial_connection, pin)
-        print serial_connection, pin, longPeriod, longOffset, midPeriod, midOffset, maxVal
+    def __init__(self, parent, board, pin, longPeriod, longOffset, midPeriod, midOffset, maxVal=1.0):
+        super(Light, self).__init__(parent, board, pin)
+        print parent, board, pin, longPeriod, longOffset, midPeriod, midOffset, maxVal
         
         longLoop = SineWave(period = longPeriod, v_range = (-0.9, maxVal), offset = longOffset)
         midLoop = SineWave(period = midPeriod, v_range = (0.5, maxVal), offset = midOffset)

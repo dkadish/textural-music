@@ -6,13 +6,16 @@ import math
 class Signal(object):
     
     def __init__(self, period, amplitude=None, v_range=(0.0, 1.0), offset=0.0):
-        self._period = float(period)
+        self._period = float(period) # in seconds
         self._v_min = v_range[0]
         self._v_max = v_range[1]
         self.offset = offset
         
         if amplitude != None:
             v_max = self.v_min + amplitude
+            
+        self.active = True
+        self.combination = '*'
          
     def next():
         pass
@@ -83,6 +86,24 @@ class SineWave(Signal):
     @property
     def t(self):
         return self._t % self.period
+
+class StepFunction(Signal):
+    def __init__(self, period, amplitude=None, v_range=(0.0, 1.0), offset=0.0):
+        super(StepFunction, self).__init__(period, amplitude, v_range, offset) #TODO: Verify this
+        self.t_start = None
+        
+        self.combination = '+'
+    
+    def value(self, t, norm=False):
+        if self.t_start == None:
+            self.t_start = t
+        
+        #print t - self.t_start, self.period
+        if t - self.t_start < self.period:
+            return self.v_max
+        else:
+            if self.v_min == 0: self.active = False
+            return self.v_min
         
 class SignalGroup(Signal):
     # SignalGroup assumes that incoming signals range in (-1.0, 1.0) and adjusts the range based on that fact.
@@ -96,8 +117,14 @@ class SignalGroup(Signal):
         self._period = reduce( lambda a, b: a*b, map(lambda signal: signal.period, signals))
         
     def value(self, t, norm=True):
-        val = reduce(lambda a, b: a*b, map(lambda signal: signal.value(t+self.offset), self.signals))
+        self.signals = filter(lambda s: s.active, self.signals)
+        
+        val = reduce(lambda a, b: a*b, map(lambda signal: signal.value(t+self.offset), filter(lambda s: s.combination == "*", self.signals)))
         v = (val - self._in_range[0]) / (self._in_range[1] - self._in_range[0]) * self.amplitude + self.v_min
+        
+        sigs = filter(lambda s: s.combination == "+", self.signals)
+        if sigs != []:
+            v += reduce(lambda a, b: a+b, map(lambda signal: signal.value(t+self.offset), sigs))
         
         if norm:
             if v < 0.0: return 0.0

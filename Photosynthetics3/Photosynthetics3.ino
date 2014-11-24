@@ -6,16 +6,19 @@
 // Depends on the kroimon version of SerialCommand
 // Available at https://github.com/kroimon/Arduino-SerialCommand
 #include <SerialCommand.h>
+#include <EEPROM.h>
 
 //#include <Cycles.h>
 
 const int pins[] = {3, 5, 6, 9, 10, 11, 13};
 const int N = 7;
+int board_id;
 
 SerialCommand sCmd(&S);     // The demo SerialCommand object
-unsigned long time;
+//unsigned long time;
 
 boolean systemOn = true;
+int ledMode = HIGH;
 
 void setup() {
   // Setup output pins
@@ -23,6 +26,8 @@ void setup() {
     pinMode(pins[i], OUTPUT);
     analogWrite(pins[i],0);
   }
+  
+  pinMode(13, OUTPUT);
   
   // Setup Serial
   S.begin(9600);
@@ -33,12 +38,17 @@ void setup() {
   sCmd.addCommand("OFF",   system_off);         // Turns LED off
   sCmd.addCommand("ALL",   all);         // Turns LED off
   sCmd.addCommand("PWM",     processPulseWidthManagement);  // Converts two arguments to integers and echos them back
+  sCmd.addCommand("LED",     processLED);  // Converts two arguments to integers and echos them back
+  sCmd.addCommand("ID",     processID);  // Converts two arguments to integers and echos them back
   sCmd.setDefaultHandler(unrecognized);      // Handler for command that isn't matched  (says "What?")
   //S.println("Ready");
+  
+  board_id = EEPROM.read(board_id);
 }
 
 void loop() {
   sCmd.readSerial();     // We don't do much, just process serial commands
+  
   delay(10);
 }
 
@@ -86,6 +96,15 @@ void processPulseWidthManagement() {
   else {
     //S.println("No arguments");
   }
+}
+
+void processLED(){
+  ledMode = !ledMode;
+  digitalWrite(13, ledMode);
+}
+
+void processID(){
+  S.println(board_id);
 }
 
 // This gets set as the default handler, and gets called when no other command matches.
