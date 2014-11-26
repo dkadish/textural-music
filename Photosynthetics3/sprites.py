@@ -40,11 +40,11 @@ class PurpleBiLeaf(PWMSprite):
         super(PurpleBiLeaf, self).__init__(parent, board, pin)
         
         if short:
-            longLoop = SineWave(period = 30*60, v_range = (0.0, 1.0))
+            longLoop = SineWave(period = 14*60, v_range = (0.0, 1.0))
             midLoop = SineWave(period = 5*60, v_range = (-0.25, 1.0), offset = 20)
             shortLoop = SineWave(period = 60, v_range = (-0.5, 1.0), offset = 30)
         else:
-            longLoop = SineWave(period = 30*60, v_range = (0.0, 1.0), offset = 30)
+            longLoop = SineWave(period = 14*60, v_range = (0.0, 1.0), offset = 30)
             midLoop = SineWave(period = 2*60, v_range = (-0.3, 1.0))
             shortLoop = SineWave(period = 1.5*60, v_range = (-0.5, 1.0), offset = 10)
         self.signal = SignalGroup([longLoop, midLoop, shortLoop], in_range=(0.0, 0.5))
@@ -53,7 +53,7 @@ class WhiteLeaf(PWMSprite):
     def __init__(self, parent, board, pin):
         super(WhiteLeaf, self).__init__(parent, board, pin)
         
-        longLoop = SineWave(period = 24*60, v_range = (0.0, 1.0), offset = 4*60)
+        longLoop = SineWave(period = 12*60, v_range = (0.0, 1.0), offset = 4*60)
         midLoop = SineWave(period = 5*60, v_range = (-0.5, 1.0), offset = 60)
         shortLoop = SineWave(period = 4*60, v_range = (-0.5, 1.0), offset = 170)
         self.signal = SignalGroup([longLoop, midLoop, shortLoop], in_range=(-0.5, 1.0))
@@ -67,11 +67,11 @@ class WhiteBiLeaf(PWMSprite):
         super(WhiteBiLeaf, self).__init__(parent, board, pin)
         
         if short:
-            longLoop = SineWave(period = 16*60, v_range = (0.0, 1.0))
+            longLoop = SineWave(period = 8*60, v_range = (0.0, 1.0))
             midLoop = SineWave(period = 1*60, v_range = (-0.25, 1.0), offset = 12)
             shortLoop = SineWave(period = 42, v_range = (-0.5, 1.0), offset = 31)
         else:
-            longLoop = SineWave(period = 16*60, v_range = (0.0, 1.0), offset = 47)
+            longLoop = SineWave(period = 8*60, v_range = (0.0, 1.0), offset = 47)
             midLoop = SineWave(period = 1.75*60, v_range = (-0.3, 1.0))
             shortLoop = SineWave(period = 34, v_range = (-0.5, 1.0), offset = 10)
         self.signal = SignalGroup([longLoop, midLoop, shortLoop], in_range=(0.0, 0.5))
@@ -80,7 +80,7 @@ class WhiteScrunchie(PWMSprite):
     def __init__(self, parent, board, pin):
         super(WhiteScrunchie, self).__init__(parent, board, pin)
         
-        longLoop = SineWave(period = 43*60, v_range = (0.0, 1.0), offset = 1237)
+        longLoop = SineWave(period = 21*60, v_range = (0.0, 1.0), offset = 1237)
         midLoop = SineWave(period = 3.2*60, v_range = (-0.2, 1.0), offset = 69)
         shortLoop = SineWave(period = 1.6*60, v_range = (-0.5, 1.0), offset = 2)
         self.signal = SignalGroup([longLoop, midLoop, shortLoop], in_range=(0.0, 0.5))

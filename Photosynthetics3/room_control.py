@@ -11,6 +11,9 @@ from serial_persistence import connect, map_connections
 #ARDUINO_XBEE = '/dev/tty.usbserial-A10139SD'
 SERIAL = True
 
+import os
+os.environ['SDL_VIDEODRIVER'] = 'dummy'
+
 class App:
 
     def __init__(self):
@@ -43,8 +46,8 @@ class App:
         '''
         pygame.init()
         
-        self.size = (640,480)
-        self.display = pygame.display.set_mode(self.size, 0)
+        #self.size = (640,480)
+        #self.display = pygame.display.set_mode(self.size, 0)
         
         # Initialize all of the leaves and lights here
         self.__init_leaves()
@@ -141,13 +144,17 @@ class App:
     def __init_lights(self):
         lights = [
             # connection, pin, longPeriod, longOffset, midPeriod, midOffset, ?maxValue?
-            [self, '0', 9, 8.5*60, 19, 3.2*60, 0],
-            [self, '1', 6, 8*60, 4*60, 2.5*60, 60], 
-            [self, '1', 3, 10*60, 20, 1.4*60, 10],  
-            [self, '1', 5, 5*60, 817, 0.75*60, 120],  
-            [self, '1', 6, 8*60, 47/2, .89*60, 6],  
-            [self, '1', 9, 5.5, 12, 1.12, 2],
-            [self, '1', 13, 4.3*60, 1237, 0.6*60*2, 0], 
+            # Purple
+            [self, '1', 11, 15*60, 15, 3.5*60, 15],
+            
+            # White Bi
+            [self, '0', 6, 8*60, 20, 1.25*60, 0],
+            
+            # Scrubchie
+            [self, '1', 9, 21*60, 1237, 3.2*60, 69],
+            
+            # Little White
+            [self, '1', 5, 12*60, 4*60, 5*60, 60],
         ]
 
         for light in lights:
@@ -156,15 +163,15 @@ class App:
     def __init_leaves(self):
         leaves = [
             # Purple Legs
-            #PurpleBiLeaf(self.xbee, 3, short=False),
-            #PurpleBiLeaf(self.xbee, 5, short=True),
+            PurpleBiLeaf(self, '0', 9, short=False),
+            PurpleBiLeaf(self, '0', 10, short=True),
             # White Leaf
-            #WhiteLeaf(self.xbee, 6), 
+            WhiteLeaf(self, '0', 13), 
             # White Legs
-            WhiteBiLeaf(self, '1', 3, short=True),
-            WhiteBiLeaf(self, '1', 5, short=False), 
+            WhiteBiLeaf(self, '0', 3, short=True),
+            WhiteBiLeaf(self, '0', 5, short=False), 
             # White Scrunchie
-            #WhiteScrunchie(self.usb, 11),
+            WhiteScrunchie(self, '0', 11),
         ]
 
         for leaf in leaves:
