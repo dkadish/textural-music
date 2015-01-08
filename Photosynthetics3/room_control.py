@@ -17,6 +17,7 @@ os.environ['SDL_VIDEODRIVER'] = 'dummy'
 class App:
 
     def __init__(self):
+        print 'Starting Init'
         self._running = True
         self._display_surf = None
         self.size = self.weight, self.height = 640, 400
@@ -40,10 +41,12 @@ class App:
         #self.camera = Camera(self)
         #self.motion_detect = MotionDetect(self)
         #self.subs = [self.camera, self.motion_detect]
+        print 'Finished Init'
 
     def on_init(self):
         '''When the room boots up.
         '''
+        print 'Starting PyGame Init'
         pygame.init()
         
         #self.size = (640,480)
@@ -63,6 +66,7 @@ class App:
         
         #self._display_surf = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
         self._running = True
+        print 'Finished PyGame Init'
  
     def on_event(self, event):
         '''Handle custom events, such as people entering the room, people entering and leaving the zones.
@@ -131,7 +135,8 @@ class App:
     def on_execute(self):
         if self.on_init() == False:
             self._running = False
- 
+        
+        print 'Starting Loop'
         while( self._running ):
             pygame.time.wait(10);
             for event in pygame.event.get():
@@ -145,16 +150,16 @@ class App:
         lights = [
             # connection, pin, longPeriod, longOffset, midPeriod, midOffset, ?maxValue?
             # Purple
-            [self, '1', 11, 15*60, 15, 3.5*60, 15],
+            [self, '1', 11, 7*60, 15, 2.5*60, 15],
             
             # White Bi
             [self, '0', 6, 8*60, 20, 1.25*60, 0],
             
             # Scrubchie
-            [self, '1', 9, 21*60, 1237, 3.2*60, 69],
+            [self, '1', 9, 11*60, 1237, 2.75*60, 69],
             
             # Little White
-            [self, '1', 5, 12*60, 4*60, 5*60, 60],
+            [self, '1', 5, 6*60, 4*60, 2.1*60, 60],
         ]
 
         for light in lights:
