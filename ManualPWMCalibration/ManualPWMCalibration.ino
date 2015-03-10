@@ -42,9 +42,14 @@ void record(){
     val = map(valueRaw, 0, 1023, 0, 255);
   
     analogWrite(LEAF_PIN, val);
+    
+    S.print(millis()-time);
+    S.print(", ");
+    S.println(val);
   } while ( buttonPressed == LOW );
   
   time = millis();
+  S.println("Record");
   
   do {
     buttonPressed = digitalRead(BUTTON_PIN);
@@ -58,7 +63,7 @@ void record(){
     S.println(val);
   } while ( buttonPressed == HIGH );
   
-  S.println(-1);
+  S.println("End");
 }
 
 void play(){
