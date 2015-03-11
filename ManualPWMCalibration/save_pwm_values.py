@@ -1,6 +1,8 @@
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2
 
-import serial, time
+import serial, time, joblib
+
+import numpy as np, scipy
 
 def save_values(port, fname, outport, pin):
   outser = None
@@ -12,6 +14,9 @@ def save_values(port, fname, outport, pin):
   f = open(fname, 'w')
   ser.write('REC\n')
   value = 0
+  
+  xi = []
+  yi = []
 
   print "WAITING..."
 
@@ -40,6 +45,9 @@ def save_values(port, fname, outport, pin):
       value = int(value)
       f.write('%d, %d\n' %(t,value))
       
+      xi.append(t)
+      yi.append(value)
+      
       if outser != None:
         outser.write('PWM %d %d\n' %(pin, value))
         #print 'PWM %d %d\n' %(pin, value)
@@ -51,6 +59,9 @@ def save_values(port, fname, outport, pin):
   print "DONE..."
   
   outser.write('PWM %d %d\n' %(pin, 0))
+  
+  pchip = scipy.interpolate.PchipInterpolator(np.array(xi), np.array(yi))
+  joblib.dump(pchip, '%s.pchip' %fname[:-4])
 
   f.close()
   ser.close()
