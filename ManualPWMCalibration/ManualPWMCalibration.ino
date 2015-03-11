@@ -46,6 +46,7 @@ void record(){
     S.print(millis()-time);
     S.print(", ");
     S.println(val);
+    delay(10);
   } while ( buttonPressed == LOW );
   
   time = millis();
@@ -61,6 +62,7 @@ void record(){
     S.print(millis()-time);
     S.print(", ");
     S.println(val);
+    delay(10);
   } while ( buttonPressed == HIGH );
   
   S.println("End");
