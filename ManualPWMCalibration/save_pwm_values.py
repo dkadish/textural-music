@@ -2,7 +2,9 @@
 
 import serial, time, joblib
 
-import numpy as np, scipy
+import numpy as np
+import scipy
+import scipy.interpolate
 
 def save_values(port, fname, outport, pin):
   outser = None
