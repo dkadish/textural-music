@@ -1,6 +1,6 @@
 #include <EEPROM.h>
 
-char UNIQUE_ID = 3;
+char UNIQUE_ID = 4;
 
 void setup() {
   // put your setup code here, to run once:
